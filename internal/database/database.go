@@ -6,6 +6,7 @@ import (
 	"github.com/your-org/boilerplate-go/internal/config"
 	"github.com/your-org/boilerplate-go/internal/user/domain"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/plugin/opentelemetry/tracing"
@@ -32,6 +33,13 @@ func Connect(cfg config.DatabaseConfig) (*gorm.DB, error) {
 			cfg.Postgres.SSLMode,
 		)
 		db, err = gorm.Open(postgres.Open(dsn), gormConfig)
+	case "sqlite":
+		// Use in-memory SQLite for testing or file path from config
+		sqliteDB := ":memory:" // Default to in-memory for tests
+		if cfg.SQLite.Path != "" {
+			sqliteDB = cfg.SQLite.Path
+		}
+		db, err = gorm.Open(sqlite.Open(sqliteDB), gormConfig)
 	default:
 		return nil, fmt.Errorf("unsupported database driver: %s", cfg.Driver)
 	}

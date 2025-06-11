@@ -13,21 +13,20 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/your-org/boilerplate-go/internal/config"
 	"github.com/your-org/boilerplate-go/internal/middleware"
-	"github.com/your-org/boilerplate-go/internal/user/application"
-	"github.com/your-org/boilerplate-go/internal/user/infrastructure"
 	"github.com/your-org/boilerplate-go/internal/user/presentation"
 	"gorm.io/gorm"
 )
 
 type Server struct {
-	config *config.Config
-	db     *gorm.DB
-	logger zerolog.Logger
-	router *gin.Engine
+	config         *config.Config
+	db             *gorm.DB
+	logger         zerolog.Logger
+	router         *gin.Engine
+	userController *presentation.UserController
 }
 
 // New creates a new server instance
-func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger) *Server {
+func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger, userController *presentation.UserController) *Server {
 	// Set Gin mode
 	gin.SetMode(cfg.Server.Mode)
 
@@ -35,10 +34,11 @@ func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger) *Server {
 	router := gin.New()
 
 	return &Server{
-		config: cfg,
-		db:     db,
-		logger: logger,
-		router: router,
+		config:         cfg,
+		db:             db,
+		logger:         logger,
+		router:         router,
+		userController: userController,
 	}
 }
 
@@ -110,11 +110,8 @@ func (s *Server) setupRoutes() {
 		// Welcome endpoint
 		v1.GET("/", s.welcome)
 
-		// User routes
-		userRepo := infrastructure.NewGormUserRepository(s.db)
-		userService := application.NewUserService(userRepo)
-		userController := presentation.NewUserController(userService, s.logger)
-		userController.RegisterRoutes(v1)
+		// User routes - using injected controller
+		s.userController.RegisterRoutes(v1)
 	}
 }
 

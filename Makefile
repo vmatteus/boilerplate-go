@@ -27,6 +27,7 @@ dev: ## Run in development mode with hot reload (requires air)
 
 install-dev-tools: ## Install development tools
 	go install github.com/air-verse/air@latest
+	go install github.com/google/wire/cmd/wire@latest
 
 docker-up: ## Start services with Docker Compose
 	docker-compose up -d
@@ -58,3 +59,13 @@ fmt: ## Format code
 deps: ## Download dependencies
 	go mod download
 	go mod tidy
+
+wire: ## Generate Wire dependency injection code
+	cd internal/wire && wire
+
+wire-check: ## Check Wire dependency injection setup
+	cd internal/wire && wire check
+
+wire-clean: ## Clean generated Wire code and regenerate
+	rm -f internal/wire/wire_gen.go
+	cd internal/wire && wire

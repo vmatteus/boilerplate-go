@@ -25,6 +25,7 @@ type ServerConfig struct {
 type DatabaseConfig struct {
 	Driver   string           `mapstructure:"driver"`
 	Postgres PostgreSQLConfig `mapstructure:"postgres"`
+	SQLite   SQLiteConfig     `mapstructure:"sqlite"`
 }
 
 type PostgreSQLConfig struct {
@@ -34,6 +35,10 @@ type PostgreSQLConfig struct {
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
 	SSLMode  string `mapstructure:"sslmode"`
+}
+
+type SQLiteConfig struct {
+	Path string `mapstructure:"path"`
 }
 
 type LoggerConfig struct {
