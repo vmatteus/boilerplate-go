@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: boilerplate-postgres
+    environment:
+      POSTGRES_DB: boilerplate
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: boilerplate-app
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     APP_DATABASE_DRIVER: postgres
+  #     APP_DATABASE_POSTGRES_HOST: postgres
+  #     APP_DATABASE_POSTGRES_PORT: 5432
+  #     APP_DATABASE_POSTGRES_USER: postgres
+  #     APP_DATABASE_POSTGRES_PASSWORD: password
+  #     APP_DATABASE_POSTGRES_DATABASE: boilerplate
+  #     APP_DATABASE_POSTGRES_SSLMODE: disable
+  #   volumes:
+  #     - .:/app
+  #   working_dir: /app
+
+volumes:
+  postgres_data:
