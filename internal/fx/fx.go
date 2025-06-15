@@ -8,12 +8,12 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/your-org/boilerplate-go/internal/config"
 	"github.com/your-org/boilerplate-go/internal/database"
+	"github.com/your-org/boilerplate-go/internal/logger"
 	"github.com/your-org/boilerplate-go/internal/server"
+	"github.com/your-org/boilerplate-go/internal/telemetry"
 	"github.com/your-org/boilerplate-go/internal/user/application"
 	"github.com/your-org/boilerplate-go/internal/user/infrastructure"
 	"github.com/your-org/boilerplate-go/internal/user/presentation"
-	"github.com/your-org/boilerplate-go/pkg/logger"
-	"github.com/your-org/boilerplate-go/pkg/telemetry"
 	"gorm.io/gorm"
 )
 
@@ -53,7 +53,7 @@ var DatabaseModule = fx.Module("database",
 // UserModule fornece componentes do domínio User
 var UserModule = fx.Module("user",
 	fx.Provide(infrastructure.NewGormUserRepository),
-	fx.Provide(application.NewUserService),
+	fx.Provide(NewUserService),
 	fx.Provide(NewUserController),
 )
 
@@ -63,13 +63,19 @@ var ServerModule = fx.Module("server",
 )
 
 // NewLogger adapter para o logger
-func NewLogger(cfg *config.Config) logger.Logger {
-	return logger.InitLogger(cfg.Logger)
+func NewLogger(cfg *config.Config) *logger.Logger {
+	appLogger := logger.InitLogger(cfg.Logger)
+	return &appLogger
 }
 
 // NewZerologLogger extrai o zerolog.Logger do nosso wrapper
-func NewZerologLogger(log logger.Logger) zerolog.Logger {
+func NewZerologLogger(log *logger.Logger) zerolog.Logger {
 	return log.Logger
+}
+
+// NewUserService adapter para o service de usuário
+func NewUserService(userRepo *infrastructure.GormUserRepository, log *logger.Logger) *application.UserService {
+	return application.NewUserService(userRepo, log)
 }
 
 // NewTelemetryCleanup adapter para telemetria
@@ -107,6 +113,6 @@ func SetupTracing(db *gorm.DB, cfg *config.Config) error {
 }
 
 // NewUserController adapter para o controller de usuário
-func NewUserController(userService *application.UserService, log logger.Logger) *presentation.UserController {
+func NewUserController(userService *application.UserService, log *logger.Logger) *presentation.UserController {
 	return presentation.NewUserController(userService, log.Logger)
 }

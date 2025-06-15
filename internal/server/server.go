@@ -10,24 +10,23 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog"
 	"github.com/your-org/boilerplate-go/internal/config"
+	"github.com/your-org/boilerplate-go/internal/logger"
 	"github.com/your-org/boilerplate-go/internal/middleware"
-	"github.com/your-org/boilerplate-go/internal/user/application"
-	"github.com/your-org/boilerplate-go/internal/user/infrastructure"
 	"github.com/your-org/boilerplate-go/internal/user/presentation"
 	"gorm.io/gorm"
 )
 
 type Server struct {
-	config *config.Config
-	db     *gorm.DB
-	logger zerolog.Logger
-	router *gin.Engine
+	config         *config.Config
+	db             *gorm.DB
+	logger         *logger.Logger
+	router         *gin.Engine
+	userController *presentation.UserController
 }
 
 // New creates a new server instance
-func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger) *Server {
+func New(cfg *config.Config, db *gorm.DB, appLogger *logger.Logger, userController *presentation.UserController) *Server {
 	// Set Gin mode
 	gin.SetMode(cfg.Server.Mode)
 
@@ -35,10 +34,11 @@ func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger) *Server {
 	router := gin.New()
 
 	return &Server{
-		config: cfg,
-		db:     db,
-		logger: logger,
-		router: router,
+		config:         cfg,
+		db:             db,
+		logger:         appLogger,
+		router:         router,
+		userController: userController,
 	}
 }
 
@@ -58,13 +58,14 @@ func (s *Server) Start() error {
 
 	// Start server in a goroutine
 	go func() {
-		s.logger.Info().
-			Str("host", s.config.Server.Host).
-			Int("port", s.config.Server.Port).
-			Msg("Starting HTTP server")
+		ctx := context.Background()
+		s.logger.LogInfo(ctx, "Starting HTTP server", map[string]interface{}{
+			"host": s.config.Server.Host,
+			"port": s.config.Server.Port,
+		})
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.logger.Fatal().Err(err).Msg("Failed to start server")
+			s.logger.LogError(ctx, "Failed to start server", err)
 		}
 	}()
 
@@ -73,24 +74,25 @@ func (s *Server) Start() error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	s.logger.Info().Msg("Shutting down server...")
+	ctx := context.Background()
+	s.logger.LogInfo(ctx, "Shutting down server...")
 
 	// Graceful shutdown with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
-		s.logger.Fatal().Err(err).Msg("Server forced to shutdown")
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		s.logger.LogError(ctx, "Server forced to shutdown", err)
 	}
 
-	s.logger.Info().Msg("Server exited")
+	s.logger.LogInfo(ctx, "Server exited")
 	return nil
 }
 
 // setupMiddleware configures middleware
 func (s *Server) setupMiddleware() {
-	s.router.Use(middleware.Logger(s.logger))
-	s.router.Use(middleware.Recovery(s.logger))
+	s.router.Use(middleware.Logger(s.logger.Logger))
+	s.router.Use(middleware.Recovery(s.logger.Logger))
 	s.router.Use(middleware.CORS())
 
 	// Add OpenTelemetry middleware if telemetry is enabled
@@ -110,11 +112,8 @@ func (s *Server) setupRoutes() {
 		// Welcome endpoint
 		v1.GET("/", s.welcome)
 
-		// User routes
-		userRepo := infrastructure.NewGormUserRepository(s.db)
-		userService := application.NewUserService(userRepo)
-		userController := presentation.NewUserController(userService, s.logger)
-		userController.RegisterRoutes(v1)
+		// User routes - using injected controller
+		s.userController.RegisterRoutes(v1)
 	}
 }
 

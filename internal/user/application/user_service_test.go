@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/your-org/boilerplate-go/internal/config"
+	"github.com/your-org/boilerplate-go/internal/logger"
 	"github.com/your-org/boilerplate-go/internal/user/application"
 	"github.com/your-org/boilerplate-go/internal/user/domain"
 )
@@ -63,9 +65,21 @@ func (m *MockUserRepository) Count(ctx context.Context) (int64, error) {
 	return args.Get(0).(int64), args.Error(1)
 }
 
+// createTestLogger creates a logger instance for testing
+func createTestLogger() *logger.Logger {
+	cfg := config.LoggerConfig{
+		Level:    "error", // Use error level to reduce test output
+		Format:   "json",
+		Provider: "stdout",
+	}
+	appLogger := logger.InitLogger(cfg)
+	return &appLogger
+}
+
 func TestUserService_CreateUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	service := application.NewUserService(mockRepo)
+	testLogger := createTestLogger()
+	service := application.NewUserService(mockRepo, testLogger)
 	ctx := context.Background()
 
 	t.Run("successful user creation", func(t *testing.T) {
@@ -75,8 +89,8 @@ func TestUserService_CreateUser(t *testing.T) {
 			Email: "john@example.com",
 		}
 
-		mockRepo.On("GetByEmail", ctx, "john@example.com").Return(nil, errors.New("user not found"))
-		mockRepo.On("Create", ctx, mock.MatchedBy(func(u *domain.User) bool {
+		mockRepo.On("GetByEmail", mock.Anything, "john@example.com").Return(nil, errors.New("user not found"))
+		mockRepo.On("Create", mock.Anything, mock.MatchedBy(func(u *domain.User) bool {
 			return u.Name == "John Doe" && u.Email == "john@example.com"
 		})).Return(user, nil)
 
@@ -112,9 +126,10 @@ func TestUserService_CreateUser(t *testing.T) {
 
 		// Reset mock for this test
 		mockRepo := new(MockUserRepository)
-		service := application.NewUserService(mockRepo)
+		testLogger := createTestLogger()
+		service := application.NewUserService(mockRepo, testLogger)
 
-		mockRepo.On("GetByEmail", ctx, "john@example.com").Return(existingUser, nil)
+		mockRepo.On("GetByEmail", mock.Anything, "john@example.com").Return(existingUser, nil)
 
 		result, err := service.CreateUser(ctx, "John Doe", "john@example.com")
 
@@ -127,7 +142,8 @@ func TestUserService_CreateUser(t *testing.T) {
 
 func TestUserService_GetUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	service := application.NewUserService(mockRepo)
+	testLogger := createTestLogger()
+	service := application.NewUserService(mockRepo, testLogger)
 	ctx := context.Background()
 
 	t.Run("successful user retrieval", func(t *testing.T) {
@@ -137,7 +153,7 @@ func TestUserService_GetUser(t *testing.T) {
 			Email: "john@example.com",
 		}
 
-		mockRepo.On("GetByID", ctx, uint(1)).Return(user, nil)
+		mockRepo.On("GetByID", mock.Anything, uint(1)).Return(user, nil)
 
 		result, err := service.GetUser(ctx, 1)
 
@@ -152,5 +168,128 @@ func TestUserService_GetUser(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, result)
 		assert.Equal(t, "invalid user ID", err.Error())
+	})
+}
+
+func TestUserService_GetUserByEmail(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	testLogger := createTestLogger()
+	service := application.NewUserService(mockRepo, testLogger)
+	ctx := context.Background()
+
+	t.Run("successful user retrieval by email", func(t *testing.T) {
+		user := &domain.User{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "john@example.com",
+		}
+
+		mockRepo.On("GetByEmail", mock.Anything, "john@example.com").Return(user, nil)
+
+		result, err := service.GetUserByEmail(ctx, "john@example.com")
+
+		assert.NoError(t, err)
+		assert.Equal(t, user, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("user retrieval with empty email", func(t *testing.T) {
+		result, err := service.GetUserByEmail(ctx, "")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+		assert.Equal(t, "email is required", err.Error())
+	})
+}
+
+func TestUserService_UpdateUser(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	testLogger := createTestLogger()
+	service := application.NewUserService(mockRepo, testLogger)
+	ctx := context.Background()
+
+	t.Run("successful user update", func(t *testing.T) {
+		user := &domain.User{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "john@example.com",
+		}
+
+		mockRepo.On("GetByID", mock.Anything, uint(1)).Return(user, nil)
+		mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(u *domain.User) bool {
+			return u.ID == 1 && u.Name == "John Smith" && u.Email == "johnsmith@example.com"
+		})).Return(nil)
+
+		result, err := service.UpdateUser(ctx, 1, "John Smith", "johnsmith@example.com")
+
+		assert.NoError(t, err)
+		assert.Equal(t, "John Smith", result.Name)
+		assert.Equal(t, "johnsmith@example.com", result.Email)
+		mockRepo.AssertExpectations(t)
+	})
+}
+
+func TestUserService_DeleteUser(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	testLogger := createTestLogger()
+	service := application.NewUserService(mockRepo, testLogger)
+	ctx := context.Background()
+
+	t.Run("successful user deletion", func(t *testing.T) {
+		mockRepo.On("Delete", mock.Anything, uint(1)).Return(nil)
+
+		err := service.DeleteUser(ctx, 1)
+
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("user deletion with invalid ID", func(t *testing.T) {
+		err := service.DeleteUser(ctx, 0)
+
+		assert.Error(t, err)
+		assert.Equal(t, "invalid user ID", err.Error())
+	})
+}
+
+func TestUserService_ListUsers(t *testing.T) {
+	t.Run("successful user listing", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		testLogger := createTestLogger()
+		service := application.NewUserService(mockRepo, testLogger)
+		ctx := context.Background()
+
+		users := []*domain.User{
+			{ID: 1, Name: "John Doe", Email: "john@example.com"},
+			{ID: 2, Name: "Jane Doe", Email: "jane@example.com"},
+		}
+
+		mockRepo.On("List", mock.Anything, 10, 0).Return(users, nil)
+
+		result, err := service.ListUsers(ctx, 10, 0)
+
+		assert.NoError(t, err)
+		assert.Equal(t, users, result)
+		assert.Len(t, result, 2)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("user listing with default pagination", func(t *testing.T) {
+		mockRepo := new(MockUserRepository)
+		testLogger := createTestLogger()
+		service := application.NewUserService(mockRepo, testLogger)
+		ctx := context.Background()
+
+		users := []*domain.User{
+			{ID: 1, Name: "John Doe", Email: "john@example.com"},
+		}
+
+		mockRepo.On("List", mock.Anything, 10, 0).Return(users, nil)
+
+		result, err := service.ListUsers(ctx, 0, -1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, users, result)
+		mockRepo.AssertExpectations(t)
 	})
 }
