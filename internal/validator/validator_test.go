@@ -3,7 +3,7 @@ package validator_test
 import (
 	"testing"
 
-	"github.com/your-org/boilerplate-go/pkg/validator"
+	"github.com/your-org/boilerplate-go/internal/validator"
 )
 
 func TestIsValidEmail(t *testing.T) {
