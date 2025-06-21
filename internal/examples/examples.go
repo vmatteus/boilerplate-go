@@ -46,7 +46,7 @@ func RunLoggerExamples() {
 func runEventBusExamples(ctx context.Context, appLogger *logger.Logger) {
 	appLogger.LogInfo(ctx, "Running EventBus Examples", map[string]interface{}{
 		"category":       "eventbus",
-		"total_examples": 4,
+		"total_examples": 6,
 		"status":         "starting",
 	})
 
@@ -54,6 +54,8 @@ func runEventBusExamples(ctx context.Context, appLogger *logger.Logger) {
 	AsyncPublishingExample()
 	ContextCancellationExample()
 	BufferOverflowExample()
+	SubscribeOnceExample()
+	ChannelEventBusExample()
 
 	appLogger.LogInfo(ctx, "EventBus examples completed", map[string]interface{}{
 		"category": "eventbus",

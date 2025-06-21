@@ -8,7 +8,7 @@ import (
 )
 
 type UserCreatedEvent struct {
-	events.BaseEvent
+	*events.BaseEvent
 	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -19,78 +19,63 @@ func NewEventBusExample() {
 	ctx := context.Background()
 	appLogger := getLogger()
 
-	appLogger.LogInfo(ctx, "EventBus Channel-Based Example", map[string]interface{}{
-		"example_type": "eventbus_channels",
+	appLogger.LogInfo(ctx, "EventBus Handler-Based Example", map[string]interface{}{
+		"example_type": "eventbus_handlers",
 		"status":       "starting",
 	})
 
-	eventBus := events.NewEventBus()
+	eventBus := events.NewEventBus(nil)
 
-	// Email Service Subscriber
-	emailChan := make(chan events.Event, DefaultChannelBuffer)
-	eventBus.Subscribe("user.created", emailChan)
+	emailHandler := func(event events.Event) {
+		user := event.(*UserCreatedEvent)
+		appLogger.LogInfo(ctx, "Email service processing", map[string]interface{}{
+			"service":  "email",
+			"action":   "send_welcome_email",
+			"username": user.Username,
+			"email":    user.Email,
+		})
+		time.Sleep(500 * time.Millisecond)
+	}
 
-	go func() {
-		for event := range emailChan {
-			user := event.(*UserCreatedEvent)
-			appLogger.LogInfo(ctx, "Email service processing", map[string]interface{}{
-				"service":  "email",
-				"action":   "send_welcome_email",
-				"username": user.Username,
-				"email":    user.Email,
-			})
-			time.Sleep(500 * time.Millisecond)
-		}
-	}()
+	analyticsHandler := func(event events.Event) {
+		user := event.(*UserCreatedEvent)
+		appLogger.LogInfo(ctx, "Analytics service processing", map[string]interface{}{
+			"service": "analytics",
+			"action":  "record_user_metrics",
+			"user_id": user.UserID,
+		})
+		time.Sleep(200 * time.Millisecond)
+	}
 
-	// Analytics Service Subscriber
-	analyticsChan := make(chan events.Event, DefaultChannelBuffer)
-	eventBus.Subscribe("user.created", analyticsChan)
+	notificationHandler := func(event events.Event) {
+		user := event.(*UserCreatedEvent)
+		appLogger.LogInfo(ctx, "Notification service processing", map[string]interface{}{
+			"service":  "notifications",
+			"action":   "create_welcome_notification",
+			"username": user.Username,
+		})
+		time.Sleep(300 * time.Millisecond)
+	}
 
-	go func() {
-		for event := range analyticsChan {
-			user := event.(*UserCreatedEvent)
-			appLogger.LogInfo(ctx, "Analytics service processing", map[string]interface{}{
-				"service": "analytics",
-				"action":  "record_user_metrics",
-				"user_id": user.UserID,
-			})
-			time.Sleep(200 * time.Millisecond)
-		}
-	}()
+	eventBus.Subscribe("user.created", emailHandler)
+	eventBus.Subscribe("user.created", analyticsHandler)
+	eventBus.Subscribe("user.created", notificationHandler)
 
-	// Notification Service Subscriber
-	notificationChan := make(chan events.Event, DefaultChannelBuffer)
-	eventBus.Subscribe("user.created", notificationChan)
-
-	go func() {
-		for event := range notificationChan {
-			user := event.(*UserCreatedEvent)
-			appLogger.LogInfo(ctx, "Notification service processing", map[string]interface{}{
-				"service":  "notifications",
-				"action":   "create_welcome_notification",
-				"username": user.Username,
-			})
-			time.Sleep(300 * time.Millisecond)
-		}
-	}()
-
-	// Simular criação de usuários
 	users := []UserCreatedEvent{
 		{
-			BaseEvent: events.BaseEvent{Name: "user.created"},
+			BaseEvent: events.NewBaseEvent("user.created"),
 			UserID:    1,
 			Username:  "joao_silva",
 			Email:     "joao@example.com",
 		},
 		{
-			BaseEvent: events.BaseEvent{Name: "user.created"},
+			BaseEvent: events.NewBaseEvent("user.created"),
 			UserID:    2,
 			Username:  "maria_santos",
 			Email:     "maria@example.com",
 		},
 		{
-			BaseEvent: events.BaseEvent{Name: "user.created"},
+			BaseEvent: events.NewBaseEvent("user.created"),
 			UserID:    3,
 			Username:  "pedro_oliveira",
 			Email:     "pedro@example.com",
@@ -102,9 +87,8 @@ func NewEventBusExample() {
 		"total_users": len(users),
 	})
 
-	// Publicar eventos
 	for _, user := range users {
-		eventBus.Publish(ctx, &user)
+		eventBus.Publish("user.created", &user)
 		appLogger.LogInfo(ctx, "Event published", map[string]interface{}{
 			"event_type": "user.created",
 			"user_id":    user.UserID,
@@ -129,41 +113,36 @@ func AsyncPublishingExample() {
 		"status":       "starting",
 	})
 
-	eventBus := events.NewEventBus()
+	eventBus := events.NewEventBus(nil)
 
-	// Subscriber para processamento demorado
-	slowProcessorChan := make(chan events.Event, 10)
-	eventBus.Subscribe("heavy.task", slowProcessorChan)
+	slowProcessorHandler := func(event events.Event) {
+		appLogger.LogInfo(ctx, "Heavy processing started", map[string]interface{}{
+			"service":    "heavy_processor",
+			"event_type": event.GetName(),
+			"status":     "processing",
+		})
+		time.Sleep(2 * time.Second)
+		appLogger.LogInfo(ctx, "Heavy processing completed", map[string]interface{}{
+			"service":    "heavy_processor",
+			"event_type": event.GetName(),
+			"status":     "completed",
+		})
+	}
 
-	go func() {
-		for event := range slowProcessorChan {
-			appLogger.LogInfo(ctx, "Heavy processing started", map[string]interface{}{
-				"service":    "heavy_processor",
-				"event_type": event.GetName(),
-				"status":     "processing",
-			})
-			time.Sleep(2 * time.Second)
-			appLogger.LogInfo(ctx, "Heavy processing completed", map[string]interface{}{
-				"service":    "heavy_processor",
-				"event_type": event.GetName(),
-				"status":     "completed",
-			})
-		}
-	}()
+	eventBus.SubscribeAsync("heavy.task", slowProcessorHandler, false)
 
-	event := &events.BaseEvent{Name: "heavy.task"}
+	event := events.NewBaseEvent("heavy.task")
 
 	appLogger.LogInfo(ctx, "Publishing heavy task asynchronously", map[string]interface{}{
 		"event_type": "heavy.task",
 		"mode":       "async",
 	})
-	eventBus.PublishAsync(ctx, event)
+	eventBus.PublishAsync("heavy.task", event)
 
 	appLogger.LogInfo(ctx, "Continuing execution without waiting", map[string]interface{}{
 		"status": "non_blocking_execution",
 	})
 
-	// Simular outras tarefas
 	for i := 0; i < 3; i++ {
 		appLogger.LogInfo(ctx, "Concurrent task completed", map[string]interface{}{
 			"task_number": i + 1,
@@ -175,7 +154,7 @@ func AsyncPublishingExample() {
 	appLogger.LogInfo(ctx, "Waiting for heavy task completion", map[string]interface{}{
 		"wait_duration": "3s",
 	})
-	time.Sleep(3 * time.Second)
+	eventBus.WaitAsync()
 }
 
 // ContextCancellationExample demonstrates context cancellation in EventBus
@@ -188,32 +167,26 @@ func ContextCancellationExample() {
 		"status":       "starting",
 	})
 
-	eventBus := events.NewEventBus()
+	eventBus := events.NewEventBus(nil)
 
-	subscriber := make(chan events.Event, 10)
-	eventBus.Subscribe("cancellable.task", subscriber)
+	handler := func(event events.Event) {
+		appLogger.LogInfo(ctx, "Processing cancellable task", map[string]interface{}{
+			"event_type": event.GetName(),
+			"status":     "processing",
+		})
+	}
 
-	go func() {
-		for event := range subscriber {
-			appLogger.LogInfo(ctx, "Processing cancellable task", map[string]interface{}{
-				"event_type": event.GetName(),
-				"status":     "processing",
-			})
-		}
-	}()
+	eventBus.Subscribe("cancellable.task", handler)
 
-	// Create a context with timeout
-	timeoutCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
-	defer cancel()
+	event := events.NewBaseEvent("cancellable.task")
 
-	event := &events.BaseEvent{Name: "cancellable.task"}
+	appLogger.LogInfo(ctx, "Publishing event", map[string]interface{}{
+		"event_type": "cancellable.task",
+	})
 
-	// Try to publish after context timeout
-	time.Sleep(600 * time.Millisecond)
-
-	err := eventBus.Publish(timeoutCtx, event)
+	err := eventBus.Publish("cancellable.task", event)
 	if err != nil {
-		appLogger.LogWarn(ctx, "Event publishing cancelled due to context timeout", map[string]interface{}{
+		appLogger.LogWarn(ctx, "Event publishing failed", map[string]interface{}{
 			"error":      err.Error(),
 			"event_type": "cancellable.task",
 		})
@@ -234,39 +207,137 @@ func BufferOverflowExample() {
 		"status":       "starting",
 	})
 
-	eventBus := events.NewEventBus()
+	eventBus := events.NewEventBus(nil)
 
-	// Small buffer subscriber
-	smallBufferChan := make(chan events.Event, 2) // Very small buffer
-	eventBus.Subscribe("burst.event", smallBufferChan)
+	slowHandler := func(event events.Event) {
+		appLogger.LogInfo(ctx, "Slow consumer processing", map[string]interface{}{
+			"event_type":      event.GetName(),
+			"processing_time": "1s",
+		})
+		time.Sleep(1 * time.Second)
+	}
 
-	// Slow consumer
-	go func() {
-		for event := range smallBufferChan {
-			appLogger.LogInfo(ctx, "Slow consumer processing", map[string]interface{}{
-				"event_type":      event.GetName(),
-				"processing_time": "1s",
-			})
-			time.Sleep(1 * time.Second) // Slow processing
-		}
-	}()
+	eventBus.SubscribeAsync("burst.event", slowHandler, false)
 
-	// Fast publisher - will cause buffer overflow
 	for i := 0; i < 5; i++ {
-		event := &events.BaseEvent{Name: "burst.event"}
+		event := events.NewBaseEvent("burst.event")
 
 		appLogger.LogInfo(ctx, "Publishing burst event", map[string]interface{}{
 			"event_number": i + 1,
 			"total_events": 5,
 		})
 
-		// Use async to avoid blocking
-		eventBus.PublishAsync(ctx, event)
+		eventBus.PublishAsync("burst.event", event)
 		time.Sleep(100 * time.Millisecond)
 	}
 
 	appLogger.LogInfo(ctx, "Waiting for burst processing", map[string]interface{}{
 		"wait_duration": "6s",
 	})
-	time.Sleep(6 * time.Second)
+	eventBus.WaitAsync()
+	time.Sleep(1 * time.Second)
+}
+
+func SubscribeOnceExample() {
+	ctx := context.Background()
+	appLogger := getLogger()
+
+	appLogger.LogInfo(ctx, "Subscribe Once Example", map[string]interface{}{
+		"example_type": "subscribe_once",
+		"status":       "starting",
+	})
+
+	eventBus := events.NewEventBus(nil)
+
+	oneTimeHandler := func(event events.Event) {
+		appLogger.LogInfo(ctx, "One-time handler executed", map[string]interface{}{
+			"event_type": event.GetName(),
+			"event_id":   event.GetID(),
+		})
+	}
+
+	eventBus.SubscribeOnce("one.time.event", oneTimeHandler)
+
+	event := events.NewBaseEvent("one.time.event")
+
+	appLogger.LogInfo(ctx, "Publishing event first time", map[string]interface{}{
+		"event_type": "one.time.event",
+	})
+	eventBus.Publish("one.time.event", event)
+
+	appLogger.LogInfo(ctx, "Publishing event second time (should not trigger handler)", map[string]interface{}{
+		"event_type": "one.time.event",
+	})
+	eventBus.Publish("one.time.event", event)
+
+	time.Sleep(500 * time.Millisecond)
+}
+
+func ChannelEventBusExample() {
+	ctx := context.Background()
+	appLogger := getLogger()
+
+	appLogger.LogInfo(ctx, "Channel EventBus Example", map[string]interface{}{
+		"example_type": "channel_eventbus",
+		"status":       "starting",
+	})
+
+	channelEventBus := events.NewChannelEventBus(nil)
+
+	emailSubscriber := channelEventBus.SubscribeChannel("user.created", 10)
+	analyticsSubscriber := channelEventBus.SubscribeChannel("user.created", 10)
+
+	go func() {
+		for event := range emailSubscriber.Channel() {
+			user := event.(*UserCreatedEvent)
+			appLogger.LogInfo(ctx, "Email service processing via channel", map[string]interface{}{
+				"service":  "email",
+				"action":   "send_welcome_email",
+				"username": user.Username,
+				"email":    user.Email,
+			})
+		}
+	}()
+
+	go func() {
+		for event := range analyticsSubscriber.Channel() {
+			user := event.(*UserCreatedEvent)
+			appLogger.LogInfo(ctx, "Analytics service processing via channel", map[string]interface{}{
+				"service": "analytics",
+				"action":  "record_user_metrics",
+				"user_id": user.UserID,
+			})
+		}
+	}()
+
+	users := []UserCreatedEvent{
+		{
+			BaseEvent: events.NewBaseEvent("user.created"),
+			UserID:    1,
+			Username:  "joao_silva",
+			Email:     "joao@example.com",
+		},
+		{
+			BaseEvent: events.NewBaseEvent("user.created"),
+			UserID:    2,
+			Username:  "maria_santos",
+			Email:     "maria@example.com",
+		},
+	}
+
+	for _, user := range users {
+		channelEventBus.PublishEvent(ctx, &user)
+		appLogger.LogInfo(ctx, "Event published via channel", map[string]interface{}{
+			"event_type": "user.created",
+			"user_id":    user.UserID,
+			"username":   user.Username,
+		})
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	time.Sleep(2 * time.Second)
+
+	emailSubscriber.Close()
+	analyticsSubscriber.Close()
+	channelEventBus.Close()
 }
