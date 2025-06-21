@@ -1,0 +1,271 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Rules for Go Boilerplate with Clean Architecture
+
+## Project Overview
+This is a Go boilerplate project following Clean Architecture principles with advanced logging, dependency injection, and OpenTelemetry integration.
+
+## Architecture Guidelines
+
+### Clean Architecture Layers
+- **Domain**: Business entities, interfaces, and core business rules
+- **Application**: Use cases, business logic, and orchestration
+- **Infrastructure**: External concerns (databases, APIs, file systems)
+- **Presentation**: HTTP handlers, DTOs, and user interface concerns
+
+### File Organization
+- Keep domain entities in `internal/[module]/domain/`
+- Place business logic in `internal/[module]/application/`
+- Store external implementations in `internal/[module]/infrastructure/`
+- Put HTTP handlers in `internal/[module]/presentation/`
+
+## Code Standards
+
+### Go Conventions
+- Use `camelCase` for variables and functions
+- Use `PascalCase` for exported types and functions
+- Use `snake_case` for file names
+- Follow Go naming conventions strictly
+
+### Error Handling
+- Always check and handle errors explicitly
+- Use `fmt.Errorf` with `%w` verb for error wrapping
+- Return errors from functions, don't panic
+- Use custom error types for domain-specific errors
+
+### Logging
+- Use structured logging with context
+- Include trace_id and span_id when available
+- Log at appropriate levels (debug, info, warn, error, fatal)
+- Use consistent field names across logs
+
+### Testing
+- Write tests for all business logic
+- Use table-driven tests for multiple scenarios
+- Mock external dependencies
+- Aim for high test coverage
+
+## Dependencies and Imports
+
+### Core Dependencies
+- **Gin**: HTTP web framework
+- **GORM**: ORM for database operations
+- **Viper**: Configuration management
+- **Zerolog**: Structured logging
+- **Uber FX**: Dependency injection
+- **OpenTelemetry**: Observability and tracing
+
+### Import Organization
+```go
+// Standard library imports
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+// Third-party imports
+import (
+    "github.com/gin-gonic/gin"
+    "github.com/rs/zerolog"
+    "go.uber.org/fx"
+)
+
+// Local imports
+import (
+    "github.com/your-org/boilerplate-go/internal/config"
+    "github.com/your-org/boilerplate-go/internal/logger"
+)
+```
+
+## Database Guidelines
+
+### GORM Usage
+- Use struct tags for database mapping
+- Implement soft deletes with `gorm.DeletedAt`
+- Use transactions for multi-table operations
+- Add indexes for frequently queried fields
+
+### Repository Pattern
+- Define interfaces in domain layer
+- Implement repositories in infrastructure layer
+- Use dependency injection for repository instances
+
+## Configuration Management
+
+### Environment Variables
+- Use `APP_` prefix for application-specific variables
+- Support both YAML config files and environment variables
+- Provide sensible defaults for all configuration options
+
+### Configuration Structure
+```yaml
+app:
+  name: "boilerplate-go"
+  version: "1.0.0"
+  port: 8080
+
+logger:
+  level: "info"
+  format: "console"
+  provider: "stdout"
+
+database:
+  driver: "postgres"
+  host: "localhost"
+  port: 5432
+```
+
+## Middleware and HTTP
+
+### Middleware Order
+1. CORS
+2. Request logging
+3. OpenTelemetry tracing
+4. Authentication/Authorization
+5. Business logic
+
+### Response Format
+- Use consistent JSON response structure
+- Include status codes and error messages
+- Support pagination for list endpoints
+
+## Development Workflow
+
+### Commands
+- `make run`: Start the application
+- `make dev`: Development with hot reload
+- `make test`: Run all tests
+- `make lint`: Run linter
+- `make docker-up`: Start with Docker Compose
+
+### Code Quality
+- Run `go fmt` before commits
+- Use `golangci-lint` for static analysis
+- Write meaningful commit messages
+- Keep functions small and focused
+
+## Security Guidelines
+
+### Input Validation
+- Validate all user inputs
+- Use the validator package for struct validation
+- Sanitize data before database operations
+
+### Authentication/Authorization
+- Implement proper authentication middleware
+- Use JWT tokens for stateless authentication
+- Validate permissions at the application layer
+
+## Performance Considerations
+
+### Database
+- Use database indexes appropriately
+- Implement connection pooling
+- Use transactions for data consistency
+- Consider read replicas for heavy read workloads
+
+### Caching
+- Cache frequently accessed data
+- Use Redis for distributed caching
+- Implement cache invalidation strategies
+
+### Monitoring
+- Use OpenTelemetry for tracing and metrics
+- Monitor application performance
+- Set up alerting for critical metrics
+
+## Documentation
+
+### Code Comments
+- Comment exported functions and types
+- Explain complex business logic
+- Document API endpoints with examples
+
+### README Updates
+- Keep README.md up to date
+- Document new features and changes
+- Include setup and usage instructions
+
+## Error Handling Patterns
+
+### Domain Errors
+```go
+type DomainError struct {
+    Code    string
+    Message string
+    Details map[string]interface{}
+}
+
+func (e DomainError) Error() string {
+    return fmt.Sprintf("[%s] %s", e.Code, e.Message)
+}
+```
+
+### HTTP Error Responses
+```go
+type ErrorResponse struct {
+    Status  int         `json:"status"`
+    Message string      `json:"message"`
+    Code    string      `json:"code,omitempty"`
+    Details interface{} `json:"details,omitempty"`
+}
+```
+
+## Testing Patterns
+
+### Unit Tests
+- Test business logic in isolation
+- Mock external dependencies
+- Use table-driven tests for multiple scenarios
+
+### Integration Tests
+- Test database operations
+- Test HTTP endpoints
+- Use test containers for external services
+
+### Test Structure
+```go
+func TestUserService_CreateUser(t *testing.T) {
+    // Arrange
+    // Act
+    // Assert
+}
+```
+
+## Deployment
+
+### Docker
+- Use multi-stage builds
+- Optimize image size
+- Include health checks
+- Use non-root user
+
+### Environment
+- Use environment-specific configurations
+- Secure sensitive data
+- Implement proper logging levels
+
+## Best Practices
+
+### General
+- Keep functions small and focused
+- Use meaningful variable names
+- Avoid global variables
+- Handle errors explicitly
+- Write self-documenting code
+
+### Performance
+- Use goroutines for concurrent operations
+- Implement proper timeouts
+- Use connection pooling
+- Monitor memory usage
+
+### Security
+- Validate all inputs
+- Use HTTPS in production
+- Implement rate limiting
+- Log security events
