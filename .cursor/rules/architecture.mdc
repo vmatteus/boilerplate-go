@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Cursor Rules for Go Boilerplate with Clean Architecture
 
