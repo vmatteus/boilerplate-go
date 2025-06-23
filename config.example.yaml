@@ -1,0 +1,32 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  mode: "debug"                    # debug, release, test
+
+database:
+  driver: "postgres"               # postgres, sqlite
+  postgres:
+    host: "localhost"
+    port: 5433
+    user: "postgres"
+    password: "password"
+    database: "boilerplate"
+    sslmode: "disable"
+
+logger:
+  level: "info"
+  format: "console"
+  provider: "stdout"
+  filepath: "./logs/app.log"
+  url: "http://localhost:9200"
+
+telemetry:
+  enabled: true
+  tracing_enabled: true
+  metrics_enabled: true
+  endpoint: "http://localhost:4317"
+  
+application:
+  name: "boilerplate-go"
+  version: "1.0.0"
+  environment: "development"
