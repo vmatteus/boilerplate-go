@@ -38,52 +38,42 @@ make lint              # Executa o linter
 make run-examples      # Executa exemplos de logger
 make run-debug         # Executa com nível debug
 make run-json          # Executa com formato JSON
-```rápido
-- 🗄️ **GORM** - ORM rico em funcionalidades com suporte para PostgreSQL e SQLite
-- ⚙️ **Configuração Viper** - Gerenciamento de configuração flexível
-- 📝 **Logging Avançado** - Logging estruturado com integração OpenTelemetry
-- 🔍 **OpenTelemetry Ready** - Observabilidade completa com rastreamento e métricas
-- 🧩 **Injeção de Dependência** - DI limpa com Uber FX
-- 🐳 **Suporte Docker** - Configuração Docker pronta para uso
-- 🔄 **Hot Reload** - Configuração de desenvolvimento com Air
-- 🧪 **Pronto para Testes** - Estruturado para testes fáceis com mocks
-- 📊 **Health Checks** - Endpoints de verificação de saúde integrados
-- 🔌 **Múltiplos Provedores de Log** - suporte para stdout, arquivo, elasticsearch, logstash
+```
 
 ## Estrutura do Projeto
 
 Este projeto segue o padrão de layout recomendado pelo [golang-standards/project-layout](https://github.com/golang-standards/project-layout) para organização de projetos Go.
 
-```
+```text
 ├── cmd/                    # Pontos de entrada da aplicação
-│   ├── main.go            # Ponto de entrada da aplicação
-│   └── examples/          # Exemplos de uso e demos
+│   ├── main.go             # Ponto de entrada principal
+│   └── examples/           # Exemplos de uso e demos
 ├── internal/               # Código privado da aplicação
-│   ├── config/            # Gerenciamento de configuração
-│   ├── database/          # Conexão com banco de dados e migrações
-│   ├── fx/                # Configuração de injeção de dependência
-│   ├── logger/            # Logging avançado com OpenTelemetry
-│   │   ├── logger.go      # Implementação principal do logger
-│   │   ├── stdout_logger.go    # Logging no console
-│   │   ├── file_logger.go      # Logging em arquivo
-│   │   ├── elasticsearch_logger.go # Integração com Elasticsearch
-│   │   └── logstash_logger.go   # Logging TCP Logstash
-│   ├── middleware/        # Middleware HTTP
-│   ├── server/            # Configuração do servidor HTTP
-│   ├── telemetry/         # Configuração OpenTelemetry
-│   └── [modules]/         # Módulos de funcionalidades (domain-driven)
-│       ├── domain/        # Entidades de negócio e interfaces
-│       ├── application/   # Casos de uso e lógica de negócio
-│       ├── infrastructure/# Preocupações externas (repositórios, etc.)
-│       ├── presentation/  # Handlers HTTP e DTOs
-│       └── examples/      # Exemplos de uso para o módulo
-├── pkg/                   # Código de biblioteca pública
-├── tests/                 # Arquivos de teste
-├── data/                  # Arquivos de banco de dados (SQLite)
-├── logs/                  # Arquivos de log (ao usar provedor de arquivo)
-├── config.yaml           # Arquivo de configuração
-├── docker-compose.yml    # Configuração Docker Compose
-└── Makefile              # Comandos de build e desenvolvimento
+│   ├── config/             # Gerenciamento de configuração
+│   ├── database/           # Conexão com banco de dados e migrações
+│   ├── fx/                 # Configuração de injeção de dependência
+│   ├── logger/             # Logging avançado com OpenTelemetry
+│   │   ├── logger.go
+│   │   ├── stdout_logger.go
+│   │   ├── file_logger.go
+│   │   ├── elasticsearch_logger.go
+│   │   └── logstash_logger.go
+│   ├── middleware/         # Middleware HTTP
+│   ├── server/             # Configuração do servidor HTTP
+│   ├── telemetry/          # Configuração OpenTelemetry
+│   └── [modules]/          # Módulos de funcionalidades (domain-driven)
+│       ├── domain/         # Entidades e interfaces de negócio
+│       ├── application/    # Casos de uso e lógica de negócio
+│       ├── infrastructure/ # Repositórios e integrações externas
+│       ├── presentation/   # Handlers HTTP e DTOs
+│       └── examples/       # Exemplos de uso do módulo
+├── pkg/                    # Código de biblioteca pública
+├── tests/                  # Arquivos de teste
+├── data/                   # Arquivos de banco de dados (SQLite)
+├── logs/                   # Arquivos de log (se usar provedor de arquivo)
+├── config.yaml             # Arquivo de configuração
+├── docker-compose.yml      # Configuração Docker Compose
+└── Makefile                # Comandos de build e desenvolvimento
 ```
 
 ## Início Rápido
