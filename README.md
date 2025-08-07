@@ -1,138 +1,163 @@
 # Go Boilerplate
 
-A clean and well-structured Go boilerplate following Clean Architecture principles, with advanced logging and dependency injection capabilities.
+Um boilerplate Go limpo e bem estruturado seguindo os princípios da Clean Architecture, com capacidades avançadas de logging e injeção de dependência.
 
-## 🚀 Features
+Este projeto segue o padrão de layout recomendado pelo [golang-standards/project-layout](https://github.com/golang-standards/project-layout) para organização de projetos Go.
 
-- 🏗️ **Clean Architecture** - Organized in layers (Domain, Application, Infrastructure, Presentation)
-- 🚀 **Gin Framework** - Fast HTTP web framework
-- 🗄️ **GORM** - Feature-rich ORM with support for PostgreSQL and SQLite
-- ⚙️ **Viper Configuration** - Flexible configuration management
-- 📝 **Advanced Logging** - Structured logging with OpenTelemetry integration
-- 🔍 **OpenTelemetry Ready** - Full observability with tracing and metrics
-- 🧩 **Dependency Injection** - Clean DI with Uber FX
-- 🐳 **Docker Support** - Ready-to-use Docker setup
-- 🔄 **Hot Reload** - Development setup with Air
-- 🧪 **Testing Ready** - Structured for easy testing with mocks
-- 📊 **Health Checks** - Built-in health check endpoints
-- 🔌 **Multiple Log Providers** - stdout, file, elasticsearch, logstash support
+## 🚀 Funcionalidades
 
-## Project Structure
+- 🏗️ **Clean Architecture** - Organizado em camadas (Domínio, Aplicação, Infraestrutura, Apresentação)
+- 🚀 **Gin Framework** -## Comandos Disponíveis
+
+```bash
+make help              # Mostra todos os comandos disponíveis
+make build             # Compila a aplicação
+make run               # Executa a aplicação
+make test              # Executa os testes
+make test-coverage     # Executa os testes com cobertura
+make dev               # Executa com hot reload
+make docker-up         # Inicia com Docker Compose
+make docker-down       # Para os serviços Docker
+make clean             # Limpa artefatos de build
+make fmt              # Formata o código
+make lint             # Executa o linter
+
+# Exemplos de logger
+make run-examples      # Executa exemplos de logger
+make run-debug         # Executa com nível debug
+make run-json         # Executa com formato JSON
+```rápido
+- 🗄️ **GORM** - ORM rico em funcionalidades com suporte para PostgreSQL e SQLite
+- ⚙️ **Configuração Viper** - Gerenciamento de configuração flexível
+- 📝 **Logging Avançado** - Logging estruturado com integração OpenTelemetry
+- 🔍 **OpenTelemetry Ready** - Observabilidade completa com rastreamento e métricas
+- 🧩 **Injeção de Dependência** - DI limpa com Uber FX
+- 🐳 **Suporte Docker** - Configuração Docker pronta para uso
+- 🔄 **Hot Reload** - Configuração de desenvolvimento com Air
+- 🧪 **Pronto para Testes** - Estruturado para testes fáceis com mocks
+- 📊 **Health Checks** - Endpoints de verificação de saúde integrados
+- 🔌 **Múltiplos Provedores de Log** - suporte para stdout, arquivo, elasticsearch, logstash
+
+## Estrutura do Projeto
+
+Este projeto segue o padrão de layout recomendado pelo [golang-standards/project-layout](https://github.com/golang-standards/project-layout) para organização de projetos Go.
 
 ```
-├── cmd/                    # Application entry points
-│   ├── main.go            # Application entry point
-│   └── examples/          # Usage examples and demos
-├── internal/               # Private application code
-│   ├── config/            # Configuration management
-│   ├── database/          # Database connection and migrations
-│   ├── fx/                # Dependency injection configuration
-│   ├── logger/            # Advanced logging with OpenTelemetry
-│   │   ├── logger.go      # Main logger implementation
-│   │   ├── stdout_logger.go    # Console logging
-│   │   ├── file_logger.go      # File logging
-│   │   ├── elasticsearch_logger.go # Elasticsearch integration
-│   │   └── logstash_logger.go   # Logstash TCP logging
-│   ├── middleware/        # HTTP middleware
-│   ├── server/            # HTTP server setup
-│   ├── telemetry/         # OpenTelemetry configuration
-│   └── [modules]/         # Feature modules (domain-driven)
-│       ├── domain/        # Business entities and interfaces
-│       ├── application/   # Use cases and business logic
-│       ├── infrastructure/# External concerns (repositories, etc.)
-│       ├── presentation/  # HTTP handlers and DTOs
-│       └── examples/      # Usage examples for the module
-├── pkg/                   # Public library code
-├── tests/                 # Test files
-├── data/                  # Database files (SQLite)
-├── logs/                  # Log files (when using file provider)
-├── config.yaml           # Configuration file
-├── docker-compose.yml    # Docker Compose setup
-└── Makefile              # Build and development commands
+├── cmd/                    # Pontos de entrada da aplicação
+│   ├── main.go            # Ponto de entrada da aplicação
+│   └── examples/          # Exemplos de uso e demos
+├── internal/               # Código privado da aplicação
+│   ├── config/            # Gerenciamento de configuração
+│   ├── database/          # Conexão com banco de dados e migrações
+│   ├── fx/                # Configuração de injeção de dependência
+│   ├── logger/            # Logging avançado com OpenTelemetry
+│   │   ├── logger.go      # Implementação principal do logger
+│   │   ├── stdout_logger.go    # Logging no console
+│   │   ├── file_logger.go      # Logging em arquivo
+│   │   ├── elasticsearch_logger.go # Integração com Elasticsearch
+│   │   └── logstash_logger.go   # Logging TCP Logstash
+│   ├── middleware/        # Middleware HTTP
+│   ├── server/            # Configuração do servidor HTTP
+│   ├── telemetry/         # Configuração OpenTelemetry
+│   └── [modules]/         # Módulos de funcionalidades (domain-driven)
+│       ├── domain/        # Entidades de negócio e interfaces
+│       ├── application/   # Casos de uso e lógica de negócio
+│       ├── infrastructure/# Preocupações externas (repositórios, etc.)
+│       ├── presentation/  # Handlers HTTP e DTOs
+│       └── examples/      # Exemplos de uso para o módulo
+├── pkg/                   # Código de biblioteca pública
+├── tests/                 # Arquivos de teste
+├── data/                  # Arquivos de banco de dados (SQLite)
+├── logs/                  # Arquivos de log (ao usar provedor de arquivo)
+├── config.yaml           # Arquivo de configuração
+├── docker-compose.yml    # Configuração Docker Compose
+└── Makefile              # Comandos de build e desenvolvimento
 ```
 
-## Quick Start
+## Início Rápido
 
-### Prerequisites
+### Pré-requisitos
 
-- Go 1.22 or higher
-- Make (optional, for convenience commands)
-- Docker & Docker Compose (optional)
+- Go 1.22 ou superior
+- Make (opcional, para comandos de conveniência)
+- Docker & Docker Compose (opcional)
 
-### Local Development
+### Desenvolvimento Local
 
-1. **Clone and setup:**
+1. **Clone e configure:**
    ```bash
-   git clone <your-repo>
+   git clone <seu-repo>
    cd boilerplate-go
    cp config.example.yaml config.yaml
    cp .env.example .env
    ```
 
-2. **Install dependencies:**
+2. **Instale as dependências:**
    ```bash
    go mod download
    ```
 
-3. **Run the application:**
+3. **Execute a aplicação:**
    ```bash
    make run
-   # or
+   # ou
    go run ./cmd
    ```
 
-4. **See logger examples:**
+4. **Veja os exemplos de logger:**
    ```bash
-   # Basic logging demo
+   # Demo básico de logging
    go run ./cmd/examples
    
-   # With debug level
+   # Com nível debug
    APP_LOGGER_LEVEL=debug go run ./cmd/examples
    
-   # With JSON format
+   # Com formato JSON
    APP_LOGGER_FORMAT=json go run ./cmd/examples
    ```
 
-5. **Access the API:**
+5. **Acesse a API:**
    - Health check: http://localhost:8080/health
-   - Welcome endpoint: http://localhost:8080/api/v1/
+   - Endpoint de boas-vindas: http://localhost:8080/api/v1/
 
-### Using Docker
+### Usando Docker
 
-1. **Start with Docker Compose:**
+1. **Inicie com Docker Compose:**
    ```bash
    make docker-up
    ```
 
-2. **Stop services:**
+2. **Pare os serviços:**
    ```bash
    make docker-down
    ```
 
-### Development with Hot Reload
+### Desenvolvimento com Hot Reload
 
-1. **Install Air:**
+1. **Instale o Air:**
    ```bash
    make install-dev-tools
    ```
 
-2. **Start development server:**
+2. **Inicie o servidor de desenvolvimento:**
    ```bash
    make dev
    ```
 
-## 📝 Advanced Logging
+## 📝 Logging Avançado
 
-The application features a sophisticated logging system with OpenTelemetry integration:
+A aplicação possui um sistema de logging sofisticado com integração OpenTelemetry:
 
-### Key Features
-- **🔍 OpenTelemetry Integration** - Automatic trace_id and span_id in logs
-- **📊 Structured Logging** - JSON and console formats
-- **🔌 Multiple Providers** - stdout, file, elasticsearch, logstash
-- **🎯 Context-Aware** - Automatic correlation with traces
-- **⚡ Performance Metrics** - Built-in timing and metrics
+### Funcionalidades Principais
+- **🔍 Integração OpenTelemetry** - trace_id e span_id automáticos nos logs
+- **📊 Logging Estruturado** - Formatos JSON e console
+- **🔌 Múltiplos Provedores** - stdout, arquivo, elasticsearch, logstash
+- **🎯 Consciente do Contexto** - Correlação automática com traces
+- **⚡ Métricas de Performance** - Timing e métricas integrados
 
-### Logger Configuration
+### Configuração do Logger
+
+### Configuração do Logger
 
 ```yaml
 logger:
@@ -140,48 +165,50 @@ logger:
   format: "console"                # console, json
   provider: "stdout"               # stdout, file, elasticsearch, logstash
   
-  # File provider
+  # Provedor de arquivo
   filepath: "./logs/app.log"
   
-  # Elasticsearch provider  
+  # Provedor Elasticsearch  
   url: "http://localhost:9200"
   index: "boilerplate-go-logs"
   username: "elastic_user"
   password: "elastic_pass"
   api_key: "your_api_key"
   
-  # Logstash provider
-  url: "localhost:5044"            # TCP endpoint
+  # Provedor Logstash
+  url: "localhost:5044"            # Endpoint TCP
 ```
 
-### Usage Examples
+### Exemplos de Uso
+
+### Exemplos de Uso
 
 ```go
-// Basic logging with context
-logger.LogInfo(ctx, "User created successfully", map[string]interface{}{
+// Logging básico com contexto
+logger.LogInfo(ctx, "Usuário criado com sucesso", map[string]interface{}{
     "user_id": 12345,
     "email": "user@example.com",
     "duration": "150ms",
 })
 
-// Error logging with error object
-logger.LogError(ctx, "Database operation failed", err, map[string]interface{}{
+// Logging de erro com objeto de erro
+logger.LogError(ctx, "Operação do banco de dados falhou", err, map[string]interface{}{
     "operation": "user_create",
     "table": "users",
 })
 
-// With OpenTelemetry tracing
+// Com rastreamento OpenTelemetry
 ctx, span := otel.Tracer("user-service").Start(ctx, "CreateUser")
 defer span.End()
 
-// Logs automatically include trace_id and span_id
-logger.LogInfo(ctx, "Processing user", map[string]interface{}{
+// Logs incluem automaticamente trace_id e span_id
+logger.LogInfo(ctx, "Processando usuário", map[string]interface{}{
     "user_id": userID,
     "step": "validation",
 })
 ```
 
-### Log Output Examples
+### Exemplos de Saída de Log
 
 **Console Format:**
 ```
@@ -201,64 +228,64 @@ logger.LogInfo(ctx, "Processing user", map[string]interface{}{
 }
 ```
 
-## 🧩 Dependency Injection with FX
+## 🧩 Injeção de Dependência com FX
 
-The application uses [Uber FX](https://uber-go.github.io/fx/) for clean dependency injection:
+A aplicação usa [Uber FX](https://uber-go.github.io/fx/) para injeção de dependência limpa:
 
-### Architecture Benefits
-- **🔧 Automatic Wiring** - Dependencies resolved automatically
-- **🧪 Easy Testing** - Simple mocking and injection
-- **📦 Modular Design** - Components organized in modules
-- **🚀 Lifecycle Management** - Proper startup/shutdown handling
+### Benefícios da Arquitetura
+- **🔧 Conexão Automática** - Dependências resolvidas automaticamente
+- **🧪 Testes Facilitados** - Mock e injeção simplificados
+- **📦 Design Modular** - Componentes organizados em módulos
+- **🚀 Gerenciamento de Ciclo de Vida** - Controle adequado de inicialização/finalização
 
-### FX Modules Structure
+### Estrutura de Módulos FX
 
 ```go
-// Application modules
+// Módulos da aplicação
 var AppModule = fx.Module("app",
-    ConfigModule,     // Configuration
-    LoggerModule,     // Advanced logging
-    TelemetryModule,  // OpenTelemetry setup
-    DatabaseModule,   // Database connection
-    UserModule,       // User domain
-    ServerModule,     // HTTP server
+    ConfigModule,     // Configuração
+    LoggerModule,     // Logging avançado
+    TelemetryModule,  // Configuração OpenTelemetry
+    DatabaseModule,   // Conexão com banco de dados
+    UserModule,       // Domínio de usuário
+    ServerModule,     // Servidor HTTP
 )
 ```
 
-### Adding New Modules
+### Adicionando Novos Módulos
 
-1. **Create module definition:**
+1. **Crie a definição do módulo:**
    ```go
-   var NewFeatureModule = fx.Module("new-feature",
+   var NovoModuloFeature = fx.Module("nova-feature",
        fx.Provide(NewFeatureRepository),
        fx.Provide(NewFeatureService),
        fx.Provide(NewFeatureController),
    )
    ```
 
-2. **Add to AppModule:**
+2. **Adicione ao AppModule:**
    ```go
    var AppModule = fx.Module("app",
-       // ... existing modules
-       NewFeatureModule,
+       // ... módulos existentes
+       NovoModuloFeature,
    )
    ```
 
-3. **Dependencies are automatically injected!**
+3. **As dependências são injetadas automaticamente!**
 
-## Configuration
+## Configuração
 
-Configuration can be managed through:
-- `config.yaml` - Main configuration file
-- Environment variables (prefixed with `APP_`)
-- Command line flags (to be implemented)
+A configuração pode ser gerenciada através de:
+- `config.yaml` - Arquivo principal de configuração
+- Variáveis de ambiente (prefixadas com `APP_`)
+- Flags de linha de comando (a ser implementado)
 
-### Configuration Hierarchy
-1. Environment variables (highest priority)
-2. Configuration file
-3. Default values (lowest priority)
+### Hierarquia de Configuração
+1. Variáveis de ambiente (prioridade mais alta)
+2. Arquivo de configuração
+3. Valores padrão (prioridade mais baixa)
 
-### Complete Configuration Example
+### Exemplo Completo de Configuração
 
 ```yaml
 server:
@@ -334,16 +361,16 @@ make run-debug         # Run with debug logging
 make run-json          # Run with JSON logging
 ```
 
-## 🔍 Observability
+## 🔍 Observabilidade
 
-### OpenTelemetry Integration
+### Integração OpenTelemetry
 
-The application is fully instrumented with OpenTelemetry for:
+A aplicação está totalmente instrumentada com OpenTelemetry para:
 
-- **📈 Distributed Tracing** - Request flow across services
-- **📊 Metrics Collection** - Performance and business metrics  
-- **📝 Correlated Logging** - Logs linked to traces
-- **🎯 Error Tracking** - Detailed error context
+- **📈 Rastreamento Distribuído** - Fluxo de requisições entre serviços
+- **📊 Coleta de Métricas** - Métricas de performance e negócio
+- **📝 Logging Correlacionado** - Logs vinculados a traces
+- **🎯 Rastreamento de Erros** - Contexto detalhado de erros
 
 ### Telemetry Configuration
 
@@ -359,25 +386,25 @@ telemetry:
   attributes: "service.name=boilerplate-go,service.version=1.0.0"
 ```
 
-## Adding New Features
+## Adicionando Novas Funcionalidades
 
-When adding new features, follow the Clean Architecture pattern with FX integration:
+Ao adicionar novas funcionalidades, siga o padrão Clean Architecture com integração FX:
 
-1. **Create a new module directory:**
+1. **Crie um novo diretório de módulo:**
    ```
    internal/orders/
    ├── domain/
-   │   ├── order.go              # Entity
-   │   └── order_repository.go   # Repository interface
+   │   ├── order.go              # Entidade
+   │   └── order_repository.go   # Interface do repositório
    ├── application/
-   │   └── order_service.go      # Business logic
+   │   └── order_service.go      # Lógica de negócio
    ├── infrastructure/
-   │   └── gorm_order_repository.go  # Repository implementation
+   │   └── gorm_order_repository.go  # Implementação do repositório
    └── presentation/
-       └── order_controller.go   # HTTP handlers
+       └── order_controller.go   # Handlers HTTP
    ```
 
-2. **Create FX module:**
+2. **Crie o módulo FX:**
    ```go
    var OrderModule = fx.Module("order",
        fx.Provide(infrastructure.NewGormOrderRepository),
@@ -386,44 +413,44 @@ When adding new features, follow the Clean Architecture pattern with FX integrat
    )
    ```
 
-3. **Add logging examples:**
+3. **Adicione exemplos de logging:**
    ```go
    func (s *OrderService) CreateOrder(ctx context.Context, order *domain.Order) error {
        ctx, span := otel.Tracer("order-service").Start(ctx, "CreateOrder")
        defer span.End()
        
-       s.logger.LogInfo(ctx, "Creating order", map[string]interface{}{
+       s.logger.LogInfo(ctx, "Criando pedido", map[string]interface{}{
            "order_id": order.ID,
            "customer_id": order.CustomerID,
        })
        
-       // ... business logic
+       // ... lógica de negócio
    }
    ```
 
-4. **Update main module and routes are automatically wired!**
+4. **Atualize o módulo principal e as rotas serão automaticamente conectadas!**
 
-## Testing
+## Testes
 
 ```bash
-# Run all tests
+# Execute todos os testes
 make test
 
-# Run tests with coverage
+# Execute os testes com cobertura
 make test-coverage
 
-# Run specific package tests
+# Execute testes de pacotes específicos
 go test ./internal/config
 go test ./internal/logger
 go test ./internal/user/application
 
-# Test with different log levels
+# Teste com diferentes níveis de log
 APP_LOGGER_LEVEL=error go test ./...
 ```
 
-### Testing with Mocks
+### Testando com Mocks
 
-The DI architecture makes testing simple:
+A arquitetura de DI facilita os testes:
 
 ```go
 func TestUserService_CreateUser(t *testing.T) {
@@ -431,20 +458,20 @@ func TestUserService_CreateUser(t *testing.T) {
     testLogger := createTestLogger()
     service := application.NewUserService(mockRepo, testLogger)
     
-    // Test automatically includes logging
+    // O teste inclui automaticamente o logging
 }
 ```
 
-## Production Deployment
+## Implantação em Produção
 
-1. **Build Docker image:**
+1. **Crie a imagem Docker:**
    ```bash
    make docker-build
    ```
 
-2. **Set production configuration:**
+2. **Defina a configuração de produção:**
    ```bash
-   # Application
+   # Aplicação
    export APP_SERVER_MODE=release
    export APP_APPLICATION_ENVIRONMENT=production
    
@@ -454,16 +481,16 @@ func TestUserService_CreateUser(t *testing.T) {
    export APP_LOGGER_PROVIDER=elasticsearch
    export APP_LOGGER_URL=https://elasticsearch.company.com
    
-   # Telemetry
+   # Telemetria
    export APP_TELEMETRY_ENABLED=true
    export APP_TELEMETRY_ENDPOINT=https://jaeger.company.com:4317
    
-   # Database
+   # Banco de Dados
    export APP_DATABASE_POSTGRES_HOST=prod-db.company.com
    export APP_DATABASE_POSTGRES_PASSWORD=secret
    ```
 
-3. **Deploy with your preferred method**
+3. **Implante com o método de sua preferência**
 
 ## 📚 Documentation
 
@@ -472,15 +499,11 @@ func TestUserService_CreateUser(t *testing.T) {
 - **OpenTelemetry Setup**: `internal/telemetry/telemetry.go`
 - **Architecture Patterns**: Follow the existing user module structure
 
-## Contributing
+## Contribuindo
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes following the established patterns
-4. Add proper logging with OpenTelemetry traces
-5. Include tests with proper DI mocking
-6. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+1. Faça um fork do repositório
+2. Crie um branch para a funcionalidade
+3. Faça suas alterações seguindo os padrões estabelecidos
+4. Adicione logging adequado com traces OpenTelemetry
+5. Inclua testes com mocks adequados para DI
+6. Envie um pull request
