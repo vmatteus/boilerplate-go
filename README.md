@@ -159,8 +159,6 @@ A aplicação possui um sistema de logging sofisticado com integração OpenTele
 
 ### Configuração do Logger
 
-### Configuração do Logger
-
 ```yaml
 logger:
   level: "info"                    # debug, info, warn, error, fatal
@@ -180,8 +178,6 @@ logger:
   # Provedor Logstash
   url: "localhost:5044"            # Endpoint TCP
 ```
-
-### Exemplos de Uso
 
 ### Exemplos de Uso
 
