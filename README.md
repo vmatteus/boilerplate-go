@@ -7,7 +7,19 @@ Este projeto segue o padrão de layout recomendado pelo [golang-standards/projec
 ## 🚀 Funcionalidades
 
 - 🏗️ **Clean Architecture** - Organizado em camadas (Domínio, Aplicação, Infraestrutura, Apresentação)
-- 🚀 **Gin Framework** -## Comandos Disponíveis
+- 🚀 **Gin Framework** - Framework web HTTP rápido
+- 🗄️ **GORM** - ORM rico em funcionalidades com suporte para PostgreSQL e SQLite
+- ⚙️ **Configuração Viper** - Gerenciamento de configuração flexível
+- 📝 **Logging Avançado** - Logging estruturado com integração OpenTelemetry
+- 🔍 **OpenTelemetry Ready** - Observabilidade completa com rastreamento e métricas
+- 🧩 **Injeção de Dependência** - DI limpa com Uber FX
+- 🐳 **Suporte Docker** - Configuração Docker pronta para uso
+- 🔄 **Hot Reload** - Configuração de desenvolvimento com Air
+- 🧪 **Pronto para Testes** - Estruturado para testes fáceis com mocks
+- 📊 **Health Checks** - Endpoints de verificação de saúde integrados
+- 🔌 **Múltiplos Provedores de Log** - suporte para stdout, arquivo, elasticsearch, logstash
+
+## Comandos Disponíveis
 
 ```bash
 make help              # Mostra todos os comandos disponíveis
@@ -19,13 +31,13 @@ make dev               # Executa com hot reload
 make docker-up         # Inicia com Docker Compose
 make docker-down       # Para os serviços Docker
 make clean             # Limpa artefatos de build
-make fmt              # Formata o código
-make lint             # Executa o linter
+make fmt               # Formata o código
+make lint              # Executa o linter
 
 # Exemplos de logger
 make run-examples      # Executa exemplos de logger
 make run-debug         # Executa com nível debug
-make run-json         # Executa com formato JSON
+make run-json          # Executa com formato JSON
 ```rápido
 - 🗄️ **GORM** - ORM rico em funcionalidades com suporte para PostgreSQL e SQLite
 - ⚙️ **Configuração Viper** - Gerenciamento de configuração flexível
